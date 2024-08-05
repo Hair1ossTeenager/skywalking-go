@@ -127,7 +127,8 @@ release: ## Build skywalking-go agent release
 	/bin/sh tools/release/create_bin_release.sh
 	/bin/sh tools/release/create_source_release.sh
 
-base.all := go1.16 go1.17 go1.18 go1.19 go1.20 go1.21 go1.22
+base.all := go1.21
+#base.all := go1.16 go1.17 go1.18 go1.19 go1.20 go1.21 go1.22
 base.each = $(word 1, $@)
 
 

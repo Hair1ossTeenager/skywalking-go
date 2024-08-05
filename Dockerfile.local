@@ -1,0 +1,3 @@
+FROM harbor.integencloud.com/public/golang:1.21.0
+
+COPY bin/skywalking-go-agent*linux* /usr/local/bin/skywalking-go-agent
