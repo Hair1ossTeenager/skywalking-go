@@ -2,12 +2,40 @@ Changes by Version
 ==================
 Release Notes.
 
+0.6.0
+------------------
+#### Features
+
+* support attaching events to span in the toolkit.
+* support record log in the toolkit.
+* support manually report metrics in the toolkit.
+
+#### Plugins
+* Support [goframev2](https://github.com/gogf/gf) goframev2.
+
+#### Documentation
+* Add docs for `AddEvent` in `Tracing APIs`
+* Add `Logging APIs` document into Manual APIs.
+* Add `Metric APIs` document into Manual APIs.
+
+#### Bug Fixes
+* Fix wrong docker image name and `-version` command.
+* Fix redis plugin cannot work in cluster mode.
+
+#### Issues and PR
+- All issues are [here](https://github.com/apache/skywalking/milestone/219?closed=1)
+- All and pull requests are [here](https://github.com/apache/skywalking-go/milestone/7?closed=1)
+
 0.5.0
 ------------------
+* **Add go `1.23` support**.
+* **Remove go `1.16`, `1.17`, and `1.18` support**.
+
 #### Features
 * Add support trace ignore.
 * Enhance the observability of makefile execution.
-* Update the error message if the peer address is empty when creating exit span.
+* Update the error message if the peer address is empty when creating an exit span.
+* Support enhancement go `1.23`.
 
 #### Plugins
 * Support [Pulsar](https://github.com/apache/pulsar-client-go) MQ.
@@ -20,6 +48,8 @@ Release Notes.
 
 ### Bug Fixes
 * Fix panic error when root span finished.
+* Fix when not route is found, the gin operation name is "http.Method:", example: "GET:".
+* Fix got `span type is wrong` error when creating exit span with trace sampling. 
 
 0.4.0
 ------------------

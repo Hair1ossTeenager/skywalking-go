@@ -17,6 +17,23 @@
 
 package trace
 
+// EventType Defines the type of Span event
+type EventType string
+
+const (
+	// DebugEventType Indicates the event type is "debug"
+	DebugEventType EventType = "debug"
+
+	// InfoEventType Indicates the event type is "info"
+	InfoEventType EventType = "info"
+
+	// WarnEventType Indicates the event type is "warn"
+	WarnEventType EventType = "warn"
+
+	// ErrorEventType Indicates the event type is "error"
+	ErrorEventType EventType = "error"
+)
+
 func (*SpanRef) PrepareAsync() {
 }
 
@@ -28,4 +45,8 @@ func (*SpanRef) SetTag(key string, value string) {
 }
 
 func (*SpanRef) AddLog(...string) {
+}
+
+// AddEvent Add an event of the specified type to SpanRef.
+func (*SpanRef) AddEvent(et EventType, event string) {
 }

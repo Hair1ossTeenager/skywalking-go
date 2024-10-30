@@ -1,4 +1,4 @@
-go 1.18
+go 1.19
 
 use (
 	.
@@ -19,7 +19,7 @@ use (
 	./plugins/mux
 	./plugins/grpc
 	./plugins/irisv12
-	./plugins/trace-activation
+	./plugins/toolkit-activation
 	./plugins/fasthttp
 	./plugins/fiber
 	./plugins/echov4
@@ -28,6 +28,7 @@ use (
 	./plugins/pulsar
 	./plugins/segmentio-kafka
 	./plugins/go-elasticsearchv8
+	./plugins/goframe
 
 	./test/benchmark-codebase/consumer
 	./test/benchmark-codebase/provider
@@ -63,6 +64,9 @@ use (
 	./test/plugins/scenarios/pulsar
 	./test/plugins/scenarios/segmentio-kafka
 	./test/plugins/scenarios/go-elasticsearchv8
+	./test/plugins/scenarios/logging-activation
+	./test/plugins/scenarios/metric-activation
+	./test/plugins/scenarios/goframe
 
 	./tools/go-agent
 

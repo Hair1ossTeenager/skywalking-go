@@ -30,4 +30,5 @@ type LogOperator interface {
 
 type LogReporter interface {
 	ReportLog(ctx, time interface{}, level, msg string, labels map[string]string)
+	GetLogContext(withEndpoint bool) interface{}
 }

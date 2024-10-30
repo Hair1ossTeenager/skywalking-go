@@ -35,7 +35,7 @@ func NewInstrument() *Instrument {
 }
 
 func (i *Instrument) Name() string {
-	return "trace-activation"
+	return "toolkit-activation"
 }
 
 func (i *Instrument) BasePackage() string {
@@ -47,6 +47,74 @@ func (i *Instrument) VersionChecker(version string) bool {
 }
 
 func (i *Instrument) Points() []*instrument.Point {
+	var instPoints []*instrument.Point
+	// append toolkit/trace related enhancements Point
+	instPoints = append(instPoints, tracePoint()...)
+
+	// append toolkit/logging related enhancements Point
+	instPoints = append(instPoints, loggingPoint()...)
+
+	// append toolkit/metric related enhancements Point
+	instPoints = append(instPoints, metricPoint()...)
+
+	return instPoints
+}
+
+func metricPoint() []*instrument.Point {
+	return []*instrument.Point{
+		// Counter metric type related enhancement point
+		{
+			PackagePath: "metric", At: instrument.NewStructEnhance("CounterRef"),
+		},
+		{
+			PackagePath: "metric", At: instrument.NewStaticMethodEnhance("NewCounter"),
+			Interceptor: "NewCounterInterceptor",
+		},
+		{
+			PackagePath: "metric", At: instrument.NewMethodEnhance("*CounterRef", "Get"),
+			Interceptor: "CounterGetInterceptor",
+		},
+		{
+			PackagePath: "metric", At: instrument.NewMethodEnhance("*CounterRef", "Inc"),
+			Interceptor: "CounterIncInterceptor",
+		},
+		// Gauge metric type related enhancement point
+		{
+			PackagePath: "metric", At: instrument.NewStructEnhance("GaugeRef"),
+		},
+		{
+			PackagePath: "metric", At: instrument.NewStaticMethodEnhance("NewGauge"),
+			Interceptor: "NewGaugeInterceptor",
+		},
+		{
+			PackagePath: "metric", At: instrument.NewMethodEnhance("*GaugeRef", "Get"),
+			Interceptor: "GaugeGetInterceptor",
+		},
+		// Histogram metric type related enhancement point
+		{
+			PackagePath: "metric", At: instrument.NewStructEnhance("HistogramRef"),
+		},
+		{
+			PackagePath: "metric", At: instrument.NewStaticMethodEnhance("NewHistogram"),
+			Interceptor: "NewHistogramInterceptor",
+		},
+		{
+			PackagePath: "metric", At: instrument.NewMethodEnhance("*HistogramRef", "Observe"),
+			Interceptor: "HistogramObserveInterceptor",
+		},
+		{
+			PackagePath: "metric", At: instrument.NewMethodEnhance("*HistogramRef", "ObserveWithCount"),
+			Interceptor: "HistogramObserveWithCountInterceptor",
+		},
+		// metric options related enhancement point
+		{
+			PackagePath: "metric", At: instrument.NewStaticMethodEnhance("WithLabels"),
+			Interceptor: "WithLabelsInterceptor",
+		},
+	}
+}
+
+func tracePoint() []*instrument.Point {
 	return []*instrument.Point{
 		{
 			PackagePath: "trace", At: instrument.NewStructEnhance("SpanRef"),
@@ -96,6 +164,14 @@ func (i *Instrument) Points() []*instrument.Point {
 			Interceptor: "AsyncLogInterceptor",
 		},
 		{
+			PackagePath: "trace", At: instrument.NewMethodEnhance("*SpanRef", "AddEvent"),
+			Interceptor: "AsyncAddEventInterceptor",
+		},
+		{
+			PackagePath: "trace", At: instrument.NewStaticMethodEnhance("AddEvent"),
+			Interceptor: "AddEventInterceptor",
+		},
+		{
 			PackagePath: "trace", At: instrument.NewStaticMethodEnhance("AddLog"),
 			Interceptor: "AddLogInterceptor",
 		},
@@ -126,6 +202,27 @@ func (i *Instrument) Points() []*instrument.Point {
 		{
 			PackagePath: "trace", At: instrument.NewStaticMethodEnhance("SetComponent"),
 			Interceptor: "SetComponentInterceptor",
+		},
+	}
+}
+
+func loggingPoint() []*instrument.Point {
+	return []*instrument.Point{
+		{
+			PackagePath: "logging", At: instrument.NewStaticMethodEnhance("Debug"),
+			Interceptor: "DebugEntryInterceptor",
+		},
+		{
+			PackagePath: "logging", At: instrument.NewStaticMethodEnhance("Info"),
+			Interceptor: "InfoEntryInterceptor",
+		},
+		{
+			PackagePath: "logging", At: instrument.NewStaticMethodEnhance("Warn"),
+			Interceptor: "WarnEntryInterceptor",
+		},
+		{
+			PackagePath: "logging", At: instrument.NewStaticMethodEnhance("Error"),
+			Interceptor: "ErrorEntryInterceptor",
 		},
 	}
 }

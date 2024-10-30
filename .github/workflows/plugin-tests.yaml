@@ -29,14 +29,14 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, macos-12]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     steps:
-      - name: Set up Go 1.18
+      - name: Set up Go 1.19
         uses: actions/setup-go@v2
         with:
-          go-version: 1.18
+          go-version: 1.19
       - name: Setup docker (missing on MacOS)
         if: runner.os == 'macos'
         env:
@@ -57,7 +57,7 @@ jobs:
           submodules: true
       - name: Build
         run: make -C test/plugins build
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         name: Upload Test Base
         with:
           name: test-tools-${{ matrix.os }}
@@ -92,6 +92,8 @@ jobs:
           - grpc
           - irisv12
           - trace-activation
+          - logging-activation
+          - metric-activation
           - fasthttp
           - discard-reporter
           - fiber
@@ -101,11 +103,12 @@ jobs:
           - pulsar
           - segmentio-kafka
           - go-elasticsearchv8
+          - goframe
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: true
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: test-tools-ubuntu-latest
           path: test/plugins/dist
@@ -115,9 +118,17 @@ jobs:
           if ls test/plugins/dist/skywalking-agent-test-validator-1.0.0.tgz; then
             docker load -i test/plugins/dist/skywalking-agent-test-validator-1.0.0.tgz
           fi
+      - name: Install docker-compose
+        shell: bash
+        run: |
+          if ! command docker-compose 2>&1 > /dev/null; then
+            echo "Installing docker-compose"
+            sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
       - name: Run Test
         run: bash test/plugins/run.sh ${{ matrix.case }}
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         name: Upload Agent
         if: ${{ failure() }}
         with:
@@ -125,7 +136,7 @@ jobs:
           name: test-plugins-workspace-${{ matrix.case }}-ubuntu
 
   test-on-macos:
-    if: always()
+    if: false
     name: gin-macos
     needs:
       - build
@@ -135,14 +146,14 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: test-tools-macos-12
           path: test/plugins/dist
-      - name: Set up Go 1.18
+      - name: Set up Go 1.19
         uses: actions/setup-go@v2
         with:
-          go-version: 1.18
+          go-version: 1.19
       - name: Setup docker (missing on MacOS)
         if: runner.os == 'macos'
         env:
@@ -163,9 +174,17 @@ jobs:
           if ls test/plugins/dist/skywalking-agent-test-validator-1.0.0.tgz; then
             docker load -i test/plugins/dist/skywalking-agent-test-validator-1.0.0.tgz
           fi
+      - name: Install docker-compose
+        shell: bash
+        run: |
+          if ! command docker-compose 2>&1 > /dev/null; then
+            echo "Installing docker-compose"
+            sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
       - name: Run Test
         run: bash test/plugins/run.sh short_versions_gin
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         name: Upload Agent
         if: ${{ failure() }}
         with:
@@ -177,12 +196,11 @@ jobs:
     name: Plugin Tests
     needs:
       - test
-      - test-on-macos
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Merge Requirement
         run: |
-          if [[ ${{ needs.test.result }} != 'success' || ${{ needs.test-on-macos.result }} != 'success' ]]; then
+          if [[ ${{ needs.test.result }} != 'success' ]]; then
             exit -1
           fi
